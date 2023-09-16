@@ -1,0 +1,4491 @@
+Nonterminals useless in grammar
+
+    binary_op
+    shift_op
+    cmp_op
+    PackageStmt
+
+
+Terminals unused in grammar
+
+    TRUE
+    FALSE
+    RSHIFT
+    LSHIFT
+    IDENT
+    VAR
+    PACKAGE
+    MUT_LIT
+
+
+Rules useless in grammar
+
+  161 binary_op: LOR
+  162          | LAND
+  163          | cmp_op
+  164          | add_op
+  165          | shift_op
+
+  166 shift_op: LSHIFT
+  167         | RSHIFT
+
+  168 cmp_op: EQL
+  169       | NEQ
+  170       | LSS
+  171       | LEQ
+  172       | GTR
+  173       | GEQ
+
+  174 PackageStmt: PACKAGE ID
+
+
+State 47 conflicts: 6 shift/reduce
+State 63 conflicts: 36 reduce/reduce
+State 92 conflicts: 1 shift/reduce
+State 109 conflicts: 1 reduce/reduce
+State 159 conflicts: 24 shift/reduce
+
+
+Grammar
+
+    0 $accept: Program $end
+
+    1 $@1: %empty
+
+    2 Program: $@1 GlobalStatementList
+
+    3 GlobalStatementList: GlobalStatementList GlobalStatement
+    4                    | GlobalStatement
+
+    5 Type: INT
+    6     | FLOAT
+    7     | STRING
+    8     | BOOL
+    9     | ADDR STRING
+
+   10 add_op: ADD
+   11       | SUB
+
+   12 mul_op: MUL
+   13       | DIV
+   14       | REM
+
+   15 unary_op: NOT
+
+   16 Expression: UnaryExpr
+
+   17 $@2: %empty
+
+   18 Expression: Expression LOR $@2 Expression2
+   19           | Expression2
+
+   20 $@3: %empty
+
+   21 Expression2: Expression2 LAND $@3 Expression3
+   22            | Expression3
+
+   23 $@4: %empty
+
+   24 Expression3: Expression3 EQL $@4 Expression4
+
+   25 $@5: %empty
+
+   26 Expression3: Expression3 NEQ $@5 Expression4
+
+   27 $@6: %empty
+
+   28 Expression3: Expression3 LSS $@6 Expression4
+
+   29 $@7: %empty
+
+   30 Expression3: Expression3 LEQ $@7 Expression4
+
+   31 $@8: %empty
+
+   32 Expression3: Expression3 GTR $@8 Expression4
+
+   33 $@9: %empty
+
+   34 Expression3: Expression3 GEQ $@9 Expression4
+   35            | Expression4
+
+   36 $@10: %empty
+
+   37 Expression4: Expression4 add_op $@10 Expression5
+   38            | Expression5
+
+   39 $@11: %empty
+
+   40 Expression5: Expression5 mul_op $@11 Expression6
+   41            | Expression6
+
+   42 Expression6: UnaryExpr
+   43            | UnaryExpr AS Type
+
+   44 UnaryExpr: PrimaryExpr
+   45          | unary_op UnaryExpr
+   46          | functionCall
+
+   47 $@12: %empty
+
+   48 functionCall: ID LPAREN $@12 ParameterListInFunctionCall RPAREN
+   49             | ID LPAREN RPAREN
+
+   50 ParameterListInFunctionCall: Operand
+   51                            | Operand COMMA ParameterListInFunctionCall
+
+   52 PrimaryExpr: Operand
+   53            | ConversionExpr
+
+   54 ConversionExpr: Type LPAREN Expression RPAREN
+
+   55 Operand: Literal
+   56        | ID
+   57        | ADDR Operand LBRACK Interindex RBRACK
+
+   58 $@13: %empty
+
+   59 Operand: ID $@13 LBRACK INT_LIT RBRACK
+   60        | LPAREN Expression RPAREN
+
+   61 $@14: %empty
+
+   62 Interindex: DOTDOT $@14 Literal
+
+   63 $@15: %empty
+
+   64 Interindex: Literal DOTDOT $@15 Literal
+   65           | Literal DOTDOT
+
+   66 Literal: INT_LIT
+   67        | FLOAT_LIT
+   68        | BOOL_LIT
+   69        | STRING_LIT
+
+   70 assign_op: ASSIGN
+   71          | ADD_ASSIGN
+   72          | SUB_ASSIGN
+   73          | MUL_ASSIGN
+   74          | DIV_ASSIGN
+   75          | REM_ASSIGN
+
+   76 AssignmentStmt: Expression assign_op Expression SEMICOLON
+
+   77 IncDecStmt: Expression INC
+   78           | Expression DEC
+
+   79 StatementList: StatementList Statement
+   80              | Statement
+
+   81 Statement: DeclarationStmt
+   82          | SimpleStmt
+   83          | Block
+   84          | IfStmt
+   85          | ForStmt
+   86          | SwitchStmt
+   87          | CaseStmt
+   88          | LetStatement LetStatementCon
+   89          | PrintStmt
+   90          | ReturnStmt
+   91          | NEWLINE
+   92          | WhileStmt
+   93          | functionCall SEMICOLON
+   94          | LOOPStatement
+
+   95 LOOPStatement: BREAK Literal SEMICOLON
+
+   96 DeclarationStmt: ID Type
+   97                | ID Type assign_op Expression
+
+   98 SimpleStmt: AssignmentStmt
+   99           | ExpressionStmt
+  100           | IncDecStmt
+
+  101 $@16: %empty
+
+  102 Block: LBRACE $@16 StatementList RBRACE
+
+  103 IfStmt: IF Condition IfBlock ELSE IfStmt
+  104       | IF Condition IfBlock
+  105       | IF Condition IfBlock ELSE Block
+
+  106 $@17: %empty
+
+  107 IfBlock: LBRACE $@17 StatementList RBRACE
+
+  108 $@18: %empty
+
+  109 IfBlock: LBRACE $@18 RBRACE
+
+  110 $@19: %empty
+
+  111 $@20: %empty
+
+  112 WhileStmt: WHILE $@19 Condition $@20 WhileBlock
+
+  113 $@21: %empty
+
+  114 WhileBlock: LBRACE $@21 StatementList RBRACE
+
+  115 ForStmt: FOR Condition Block ELSE Block
+  116        | FOR ForClause Block ELSE Block
+  117        | FOR ForClause LBRACE StatementList RBRACE
+
+  118 ForClause: InitStmt SEMICOLON Condition SEMICOLON PostStmt
+  119          | ID IN Operand
+
+  120 InitStmt: SimpleStmt
+
+  121 Condition: Expression
+
+  122 PostStmt: SimpleStmt
+
+  123 SwitchStmt: SWITCH Expression
+
+  124 CaseStmt: CASE INT_LIT COLON Block
+  125         | CASE DEFAULT COLON Block
+
+  126 LetStatement: LET ID COLON Type ASSIGN Operand SEMICOLON
+  127             | LET ID COLON Type SEMICOLON
+  128             | LET MUT ID COLON Type ASSIGN Literal SEMICOLON
+  129             | LET MUT ID COLON Type SEMICOLON
+  130             | LET ID COLON Type ASSIGN SEMICOLON
+  131             | LET MUT ID COLON Type ASSIGN SEMICOLON
+  132             | LET MUT ID ASSIGN Operand SEMICOLON
+
+  133 $@22: %empty
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON
+  135             | LET ID ASSIGN Operand SEMICOLON
+  136             | LET ID COLON Type ASSIGN LOOP Block SEMICOLON
+
+  137 LiteralList: Literal COMMA LiteralList
+  138            | Literal
+
+  139 LetStatementCon: ASSIGN Literal SEMICOLON
+  140                | %empty
+
+  141 $@23: %empty
+
+  142 PrintStmt: PRINT Expression $@23 SEMICOLON
+
+  143 $@24: %empty
+
+  144 PrintStmt: PRINTLN Expression $@24 SEMICOLON
+
+  145 ReturnStmt: RETURN Expression SEMICOLON
+
+  146 GlobalStatement: FunctionDeclStmt
+  147                | NEWLINE
+
+  148 $@25: %empty
+
+  149 FunctionDeclStmt: FuncOpen LPAREN RPAREN $@25 FuncBlock
+
+  150 $@26: %empty
+
+  151 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN Type $@26 FuncBlock
+
+  152 $@27: %empty
+
+  153 FunctionDeclStmt: FuncOpen LPAREN RPAREN ARROW Type $@27 FuncBlock
+
+  154 $@28: %empty
+
+  155 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN ARROW Type $@28 FuncBlock
+
+  156 FuncOpen: FUNC ID
+
+  157 ParameterList: ID COLON Type
+  158              | ParameterList COMMA ID COLON Type
+
+  159 FuncBlock: LBRACE StatementList RBRACE
+
+  160 ExpressionStmt: Expression
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    LET (258) 126 127 128 129 130 131 132 134 135 136
+    MUT (259) 128 129 131 132
+    NEWLINE (260) 91 147
+    INT (261) 5
+    FLOAT (262) 6
+    BOOL (263) 8
+    STRING (264) 7 9
+    TRUE (265)
+    FALSE (266)
+    GTR (267) 32
+    LSS (268) 28
+    GEQ (269) 34
+    LEQ (270) 30
+    EQL (271) 24
+    NEQ (272) 26
+    LOR (273) 18
+    LAND (274) 21
+    ASSIGN (275) 70 126 128 130 131 132 134 135 136 139
+    ADD_ASSIGN (276) 71
+    SUB_ASSIGN (277) 72
+    MUL_ASSIGN (278) 73
+    DIV_ASSIGN (279) 74
+    REM_ASSIGN (280) 75
+    IF (281) 103 104 105
+    ELSE (282) 103 105 115 116
+    FOR (283) 115 116 117
+    WHILE (284) 112
+    LOOP (285) 136
+    SWITCH (286) 123
+    CASE (287) 124 125
+    DEFAULT (288) 125
+    PRINT (289) 142
+    PRINTLN (290) 144
+    ADDR (291) 9 57
+    FUNC (292) 156
+    RETURN (293) 145
+    BREAK (294) 95
+    ID (295) 48 49 56 59 96 97 119 126 127 128 129 130 131 132 134 135 136 156 157 158
+    ARROW (296) 153 155
+    AS (297) 43
+    IN (298) 119
+    DOTDOT (299) 62 64 65
+    RSHIFT (300)
+    LSHIFT (301)
+    IDENT (302)
+    LBRACE (303) 102 107 109 114 117 159
+    RBRACE (304) 102 107 109 114 117 159
+    LBRACK (305) 57 59 134
+    RBRACK (306) 57 59 134
+    LPAREN (307) 48 49 54 60 149 151 153 155
+    RPAREN (308) 48 49 54 60 149 151 153 155
+    INC (309) 77
+    DEC (310) 78
+    VAR (311)
+    COLON (312) 124 125 126 127 128 129 130 131 134 136 157 158
+    SEMICOLON (313) 76 93 95 118 126 127 128 129 130 131 132 134 135 136 139 142 144 145
+    COMMA (314) 51 137 158
+    PACKAGE (315)
+    ADD (316) 10
+    SUB (317) 11
+    NOT (318) 15
+    MUL (319) 12
+    DIV (320) 13
+    REM (321) 14
+    INT_LIT <val> (322) 59 66 124
+    FLOAT_LIT <val> (323) 67
+    BOOL_LIT <val> (324) 68
+    STRING_LIT <s_val> (325) 69
+    MUT_LIT <mut_val> (326)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (72)
+        on left: 0
+    Program (73)
+        on left: 2
+        on right: 0
+    $@1 (74)
+        on left: 1
+        on right: 2
+    GlobalStatementList (75)
+        on left: 3 4
+        on right: 2 3
+    Type <type> (76)
+        on left: 5 6 7 8 9
+        on right: 43 54 96 97 126 127 128 129 130 131 134 136 151 153 155 157 158
+    add_op <op> (77)
+        on left: 10 11
+        on right: 37
+    mul_op <op> (78)
+        on left: 12 13 14
+        on right: 40
+    unary_op <op> (79)
+        on left: 15
+        on right: 45
+    Expression <val> (80)
+        on left: 16 18 19
+        on right: 18 54 60 76 77 78 97 121 123 142 144 145 160
+    $@2 (81)
+        on left: 17
+        on right: 18
+    Expression2 <val> (82)
+        on left: 21 22
+        on right: 18 19 21
+    $@3 (83)
+        on left: 20
+        on right: 21
+    Expression3 <val> (84)
+        on left: 24 26 28 30 32 34 35
+        on right: 21 22 24 26 28 30 32 34
+    $@4 (85)
+        on left: 23
+        on right: 24
+    $@5 (86)
+        on left: 25
+        on right: 26
+    $@6 (87)
+        on left: 27
+        on right: 28
+    $@7 (88)
+        on left: 29
+        on right: 30
+    $@8 (89)
+        on left: 31
+        on right: 32
+    $@9 (90)
+        on left: 33
+        on right: 34
+    Expression4 <val> (91)
+        on left: 37 38
+        on right: 24 26 28 30 32 34 35 37
+    $@10 (92)
+        on left: 36
+        on right: 37
+    Expression5 <val> (93)
+        on left: 40 41
+        on right: 37 38 40
+    $@11 (94)
+        on left: 39
+        on right: 40
+    Expression6 <val> (95)
+        on left: 42 43
+        on right: 40 41
+    UnaryExpr <val> (96)
+        on left: 44 45 46
+        on right: 16 42 43 45
+    functionCall (97)
+        on left: 48 49
+        on right: 46 93
+    $@12 (98)
+        on left: 47
+        on right: 48
+    ParameterListInFunctionCall (99)
+        on left: 50 51
+        on right: 48 51
+    PrimaryExpr <val> (100)
+        on left: 52 53
+        on right: 44
+    ConversionExpr <val> (101)
+        on left: 54
+        on right: 53
+    Operand <val> (102)
+        on left: 55 56 57 59 60
+        on right: 50 51 52 57 119 126 132 134 135
+    $@13 (103)
+        on left: 58
+        on right: 59
+    Interindex (104)
+        on left: 62 64 65
+        on right: 57
+    $@14 (105)
+        on left: 61
+        on right: 62
+    $@15 (106)
+        on left: 63
+        on right: 64
+    Literal <val> (107)
+        on left: 66 67 68 69
+        on right: 55 62 64 65 95 128 137 138 139
+    assign_op <op> (108)
+        on left: 70 71 72 73 74 75
+        on right: 76 97
+    AssignmentStmt (109)
+        on left: 76
+        on right: 98
+    IncDecStmt (110)
+        on left: 77 78
+        on right: 100
+    StatementList (111)
+        on left: 79 80
+        on right: 79 102 107 114 117 159
+    Statement (112)
+        on left: 81 82 83 84 85 86 87 88 89 90 91 92 93 94
+        on right: 79 80
+    LOOPStatement (113)
+        on left: 95
+        on right: 94
+    DeclarationStmt (114)
+        on left: 96 97
+        on right: 81
+    SimpleStmt (115)
+        on left: 98 99 100
+        on right: 82 120 122
+    Block (116)
+        on left: 102
+        on right: 83 105 115 116 124 125 136
+    $@16 (117)
+        on left: 101
+        on right: 102
+    IfStmt (118)
+        on left: 103 104 105
+        on right: 84 103
+    IfBlock (119)
+        on left: 107 109
+        on right: 103 104 105
+    $@17 (120)
+        on left: 106
+        on right: 107
+    $@18 (121)
+        on left: 108
+        on right: 109
+    WhileStmt (122)
+        on left: 112
+        on right: 92
+    $@19 (123)
+        on left: 110
+        on right: 112
+    $@20 (124)
+        on left: 111
+        on right: 112
+    WhileBlock (125)
+        on left: 114
+        on right: 112
+    $@21 (126)
+        on left: 113
+        on right: 114
+    ForStmt (127)
+        on left: 115 116 117
+        on right: 85
+    ForClause (128)
+        on left: 118 119
+        on right: 116 117
+    InitStmt (129)
+        on left: 120
+        on right: 118
+    Condition (130)
+        on left: 121
+        on right: 103 104 105 112 115 118
+    PostStmt (131)
+        on left: 122
+        on right: 118
+    SwitchStmt (132)
+        on left: 123
+        on right: 86
+    CaseStmt (133)
+        on left: 124 125
+        on right: 87
+    LetStatement (134)
+        on left: 126 127 128 129 130 131 132 134 135 136
+        on right: 88
+    $@22 (135)
+        on left: 133
+        on right: 134
+    LiteralList (136)
+        on left: 137 138
+        on right: 134 137
+    LetStatementCon (137)
+        on left: 139 140
+        on right: 88
+    PrintStmt <type> (138)
+        on left: 142 144
+        on right: 89
+    $@23 (139)
+        on left: 141
+        on right: 142
+    $@24 (140)
+        on left: 143
+        on right: 144
+    ReturnStmt (141)
+        on left: 145
+        on right: 90
+    GlobalStatement (142)
+        on left: 146 147
+        on right: 3 4
+    FunctionDeclStmt (143)
+        on left: 149 151 153 155
+        on right: 146
+    $@25 (144)
+        on left: 148
+        on right: 149
+    $@26 (145)
+        on left: 150
+        on right: 151
+    $@27 (146)
+        on left: 152
+        on right: 153
+    $@28 (147)
+        on left: 154
+        on right: 155
+    FuncOpen <s_val> (148)
+        on left: 156
+        on right: 149 151 153 155
+    ParameterList <s_val> (149)
+        on left: 157 158
+        on right: 151 155 158
+    FuncBlock (150)
+        on left: 159
+        on right: 149 151 153 155
+    ExpressionStmt (151)
+        on left: 160
+        on right: 99
+
+
+State 0
+
+    0 $accept: . Program $end
+
+    $default  reduce using rule 1 ($@1)
+
+    Program  go to state 1
+    $@1      go to state 2
+
+
+State 1
+
+    0 $accept: Program . $end
+
+    $end  shift, and go to state 3
+
+
+State 2
+
+    2 Program: $@1 . GlobalStatementList
+
+    NEWLINE  shift, and go to state 4
+    FUNC     shift, and go to state 5
+
+    GlobalStatementList  go to state 6
+    GlobalStatement      go to state 7
+    FunctionDeclStmt     go to state 8
+    FuncOpen             go to state 9
+
+
+State 3
+
+    0 $accept: Program $end .
+
+    $default  accept
+
+
+State 4
+
+  147 GlobalStatement: NEWLINE .
+
+    $default  reduce using rule 147 (GlobalStatement)
+
+
+State 5
+
+  156 FuncOpen: FUNC . ID
+
+    ID  shift, and go to state 10
+
+
+State 6
+
+    2 Program: $@1 GlobalStatementList .
+    3 GlobalStatementList: GlobalStatementList . GlobalStatement
+
+    NEWLINE  shift, and go to state 4
+    FUNC     shift, and go to state 5
+
+    $default  reduce using rule 2 (Program)
+
+    GlobalStatement   go to state 11
+    FunctionDeclStmt  go to state 8
+    FuncOpen          go to state 9
+
+
+State 7
+
+    4 GlobalStatementList: GlobalStatement .
+
+    $default  reduce using rule 4 (GlobalStatementList)
+
+
+State 8
+
+  146 GlobalStatement: FunctionDeclStmt .
+
+    $default  reduce using rule 146 (GlobalStatement)
+
+
+State 9
+
+  149 FunctionDeclStmt: FuncOpen . LPAREN RPAREN $@25 FuncBlock
+  151                 | FuncOpen . LPAREN ParameterList RPAREN Type $@26 FuncBlock
+  153                 | FuncOpen . LPAREN RPAREN ARROW Type $@27 FuncBlock
+  155                 | FuncOpen . LPAREN ParameterList RPAREN ARROW Type $@28 FuncBlock
+
+    LPAREN  shift, and go to state 12
+
+
+State 10
+
+  156 FuncOpen: FUNC ID .
+
+    $default  reduce using rule 156 (FuncOpen)
+
+
+State 11
+
+    3 GlobalStatementList: GlobalStatementList GlobalStatement .
+
+    $default  reduce using rule 3 (GlobalStatementList)
+
+
+State 12
+
+  149 FunctionDeclStmt: FuncOpen LPAREN . RPAREN $@25 FuncBlock
+  151                 | FuncOpen LPAREN . ParameterList RPAREN Type $@26 FuncBlock
+  153                 | FuncOpen LPAREN . RPAREN ARROW Type $@27 FuncBlock
+  155                 | FuncOpen LPAREN . ParameterList RPAREN ARROW Type $@28 FuncBlock
+
+    ID      shift, and go to state 13
+    RPAREN  shift, and go to state 14
+
+    ParameterList  go to state 15
+
+
+State 13
+
+  157 ParameterList: ID . COLON Type
+
+    COLON  shift, and go to state 16
+
+
+State 14
+
+  149 FunctionDeclStmt: FuncOpen LPAREN RPAREN . $@25 FuncBlock
+  153                 | FuncOpen LPAREN RPAREN . ARROW Type $@27 FuncBlock
+
+    ARROW  shift, and go to state 17
+
+    $default  reduce using rule 148 ($@25)
+
+    $@25  go to state 18
+
+
+State 15
+
+  151 FunctionDeclStmt: FuncOpen LPAREN ParameterList . RPAREN Type $@26 FuncBlock
+  155                 | FuncOpen LPAREN ParameterList . RPAREN ARROW Type $@28 FuncBlock
+  158 ParameterList: ParameterList . COMMA ID COLON Type
+
+    RPAREN  shift, and go to state 19
+    COMMA   shift, and go to state 20
+
+
+State 16
+
+  157 ParameterList: ID COLON . Type
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+
+    Type  go to state 26
+
+
+State 17
+
+  153 FunctionDeclStmt: FuncOpen LPAREN RPAREN ARROW . Type $@27 FuncBlock
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+
+    Type  go to state 27
+
+
+State 18
+
+  149 FunctionDeclStmt: FuncOpen LPAREN RPAREN $@25 . FuncBlock
+
+    LBRACE  shift, and go to state 28
+
+    FuncBlock  go to state 29
+
+
+State 19
+
+  151 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN . Type $@26 FuncBlock
+  155                 | FuncOpen LPAREN ParameterList RPAREN . ARROW Type $@28 FuncBlock
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+    ARROW   shift, and go to state 30
+
+    Type  go to state 31
+
+
+State 20
+
+  158 ParameterList: ParameterList COMMA . ID COLON Type
+
+    ID  shift, and go to state 32
+
+
+State 21
+
+    5 Type: INT .
+
+    $default  reduce using rule 5 (Type)
+
+
+State 22
+
+    6 Type: FLOAT .
+
+    $default  reduce using rule 6 (Type)
+
+
+State 23
+
+    8 Type: BOOL .
+
+    $default  reduce using rule 8 (Type)
+
+
+State 24
+
+    7 Type: STRING .
+
+    $default  reduce using rule 7 (Type)
+
+
+State 25
+
+    9 Type: ADDR . STRING
+
+    STRING  shift, and go to state 33
+
+
+State 26
+
+  157 ParameterList: ID COLON Type .
+
+    $default  reduce using rule 157 (ParameterList)
+
+
+State 27
+
+  153 FunctionDeclStmt: FuncOpen LPAREN RPAREN ARROW Type . $@27 FuncBlock
+
+    $default  reduce using rule 152 ($@27)
+
+    $@27  go to state 34
+
+
+State 28
+
+  159 FuncBlock: LBRACE . StatementList RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    StatementList    go to state 71
+    Statement        go to state 72
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 29
+
+  149 FunctionDeclStmt: FuncOpen LPAREN RPAREN $@25 FuncBlock .
+
+    $default  reduce using rule 149 (FunctionDeclStmt)
+
+
+State 30
+
+  155 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN ARROW . Type $@28 FuncBlock
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+
+    Type  go to state 86
+
+
+State 31
+
+  151 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN Type . $@26 FuncBlock
+
+    $default  reduce using rule 150 ($@26)
+
+    $@26  go to state 87
+
+
+State 32
+
+  158 ParameterList: ParameterList COMMA ID . COLON Type
+
+    COLON  shift, and go to state 88
+
+
+State 33
+
+    9 Type: ADDR STRING .
+
+    $default  reduce using rule 9 (Type)
+
+
+State 34
+
+  153 FunctionDeclStmt: FuncOpen LPAREN RPAREN ARROW Type $@27 . FuncBlock
+
+    LBRACE  shift, and go to state 28
+
+    FuncBlock  go to state 89
+
+
+State 35
+
+  126 LetStatement: LET . ID COLON Type ASSIGN Operand SEMICOLON
+  127             | LET . ID COLON Type SEMICOLON
+  128             | LET . MUT ID COLON Type ASSIGN Literal SEMICOLON
+  129             | LET . MUT ID COLON Type SEMICOLON
+  130             | LET . ID COLON Type ASSIGN SEMICOLON
+  131             | LET . MUT ID COLON Type ASSIGN SEMICOLON
+  132             | LET . MUT ID ASSIGN Operand SEMICOLON
+  134             | LET . ID COLON LBRACK Type SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON
+  135             | LET . ID ASSIGN Operand SEMICOLON
+  136             | LET . ID COLON Type ASSIGN LOOP Block SEMICOLON
+
+    MUT  shift, and go to state 90
+    ID   shift, and go to state 91
+
+
+State 36
+
+   91 Statement: NEWLINE .
+
+    $default  reduce using rule 91 (Statement)
+
+
+State 37
+
+  103 IfStmt: IF . Condition IfBlock ELSE IfStmt
+  104       | IF . Condition IfBlock
+  105       | IF . Condition IfBlock ELSE Block
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 93
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+    Condition       go to state 95
+
+
+State 38
+
+  115 ForStmt: FOR . Condition Block ELSE Block
+  116        | FOR . ForClause Block ELSE Block
+  117        | FOR . ForClause LBRACE StatementList RBRACE
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 96
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 97
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+    AssignmentStmt  go to state 69
+    IncDecStmt      go to state 70
+    SimpleStmt      go to state 98
+    ForClause       go to state 99
+    InitStmt        go to state 100
+    Condition       go to state 101
+    ExpressionStmt  go to state 85
+
+
+State 39
+
+  112 WhileStmt: WHILE . $@19 Condition $@20 WhileBlock
+
+    $default  reduce using rule 110 ($@19)
+
+    $@19  go to state 102
+
+
+State 40
+
+  123 SwitchStmt: SWITCH . Expression
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 103
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 41
+
+  124 CaseStmt: CASE . INT_LIT COLON Block
+  125         | CASE . DEFAULT COLON Block
+
+    DEFAULT  shift, and go to state 104
+    INT_LIT  shift, and go to state 105
+
+
+State 42
+
+  142 PrintStmt: PRINT . Expression $@23 SEMICOLON
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 106
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 43
+
+  144 PrintStmt: PRINTLN . Expression $@24 SEMICOLON
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 107
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 44
+
+    9 Type: ADDR . STRING
+   57 Operand: ADDR . Operand LBRACK Interindex RBRACK
+
+    STRING      shift, and go to state 33
+    ADDR        shift, and go to state 108
+    ID          shift, and go to state 109
+    LPAREN      shift, and go to state 49
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Operand  go to state 110
+    Literal  go to state 68
+
+
+State 45
+
+  145 ReturnStmt: RETURN . Expression SEMICOLON
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 111
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 46
+
+   95 LOOPStatement: BREAK . Literal SEMICOLON
+
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Literal  go to state 112
+
+
+State 47
+
+   48 functionCall: ID . LPAREN $@12 ParameterListInFunctionCall RPAREN
+   49             | ID . LPAREN RPAREN
+   56 Operand: ID .
+   59        | ID . $@13 LBRACK INT_LIT RBRACK
+   96 DeclarationStmt: ID . Type
+   97                | ID . Type assign_op Expression
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+    LPAREN  shift, and go to state 113
+
+    INT       [reduce using rule 56 (Operand)]
+    FLOAT     [reduce using rule 56 (Operand)]
+    BOOL      [reduce using rule 56 (Operand)]
+    STRING    [reduce using rule 56 (Operand)]
+    ADDR      [reduce using rule 56 (Operand)]
+    LBRACK    reduce using rule 58 ($@13)
+    LPAREN    [reduce using rule 56 (Operand)]
+    $default  reduce using rule 56 (Operand)
+
+    Type  go to state 114
+    $@13  go to state 115
+
+
+State 48
+
+  102 Block: LBRACE . $@16 StatementList RBRACE
+
+    $default  reduce using rule 101 ($@16)
+
+    $@16  go to state 116
+
+
+State 49
+
+   60 Operand: LPAREN . Expression RPAREN
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 117
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 50
+
+   15 unary_op: NOT .
+
+    $default  reduce using rule 15 (unary_op)
+
+
+State 51
+
+   66 Literal: INT_LIT .
+
+    $default  reduce using rule 66 (Literal)
+
+
+State 52
+
+   67 Literal: FLOAT_LIT .
+
+    $default  reduce using rule 67 (Literal)
+
+
+State 53
+
+   68 Literal: BOOL_LIT .
+
+    $default  reduce using rule 68 (Literal)
+
+
+State 54
+
+   69 Literal: STRING_LIT .
+
+    $default  reduce using rule 69 (Literal)
+
+
+State 55
+
+   54 ConversionExpr: Type . LPAREN Expression RPAREN
+
+    LPAREN  shift, and go to state 118
+
+
+State 56
+
+   45 UnaryExpr: unary_op . UnaryExpr
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    UnaryExpr       go to state 119
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 57
+
+   18 Expression: Expression . LOR $@2 Expression2
+   76 AssignmentStmt: Expression . assign_op Expression SEMICOLON
+   77 IncDecStmt: Expression . INC
+   78           | Expression . DEC
+  160 ExpressionStmt: Expression .
+
+    LOR         shift, and go to state 120
+    ASSIGN      shift, and go to state 121
+    ADD_ASSIGN  shift, and go to state 122
+    SUB_ASSIGN  shift, and go to state 123
+    MUL_ASSIGN  shift, and go to state 124
+    DIV_ASSIGN  shift, and go to state 125
+    REM_ASSIGN  shift, and go to state 126
+    INC         shift, and go to state 127
+    DEC         shift, and go to state 128
+
+    $default  reduce using rule 160 (ExpressionStmt)
+
+    assign_op  go to state 129
+
+
+State 58
+
+   19 Expression: Expression2 .
+   21 Expression2: Expression2 . LAND $@3 Expression3
+
+    LAND  shift, and go to state 130
+
+    $default  reduce using rule 19 (Expression)
+
+
+State 59
+
+   22 Expression2: Expression3 .
+   24 Expression3: Expression3 . EQL $@4 Expression4
+   26            | Expression3 . NEQ $@5 Expression4
+   28            | Expression3 . LSS $@6 Expression4
+   30            | Expression3 . LEQ $@7 Expression4
+   32            | Expression3 . GTR $@8 Expression4
+   34            | Expression3 . GEQ $@9 Expression4
+
+    GTR  shift, and go to state 131
+    LSS  shift, and go to state 132
+    GEQ  shift, and go to state 133
+    LEQ  shift, and go to state 134
+    EQL  shift, and go to state 135
+    NEQ  shift, and go to state 136
+
+    $default  reduce using rule 22 (Expression2)
+
+
+State 60
+
+   35 Expression3: Expression4 .
+   37 Expression4: Expression4 . add_op $@10 Expression5
+
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+
+    $default  reduce using rule 35 (Expression3)
+
+    add_op  go to state 139
+
+
+State 61
+
+   38 Expression4: Expression5 .
+   40 Expression5: Expression5 . mul_op $@11 Expression6
+
+    MUL  shift, and go to state 140
+    DIV  shift, and go to state 141
+    REM  shift, and go to state 142
+
+    $default  reduce using rule 38 (Expression4)
+
+    mul_op  go to state 143
+
+
+State 62
+
+   41 Expression5: Expression6 .
+
+    $default  reduce using rule 41 (Expression5)
+
+
+State 63
+
+   16 Expression: UnaryExpr .
+   42 Expression6: UnaryExpr .
+   43            | UnaryExpr . AS Type
+
+    AS  shift, and go to state 144
+
+    LET         reduce using rule 16 (Expression)
+    LET         [reduce using rule 42 (Expression6)]
+    NEWLINE     reduce using rule 16 (Expression)
+    NEWLINE     [reduce using rule 42 (Expression6)]
+    INT         reduce using rule 16 (Expression)
+    INT         [reduce using rule 42 (Expression6)]
+    FLOAT       reduce using rule 16 (Expression)
+    FLOAT       [reduce using rule 42 (Expression6)]
+    BOOL        reduce using rule 16 (Expression)
+    BOOL        [reduce using rule 42 (Expression6)]
+    STRING      reduce using rule 16 (Expression)
+    STRING      [reduce using rule 42 (Expression6)]
+    GTR         reduce using rule 42 (Expression6)
+    LSS         reduce using rule 42 (Expression6)
+    GEQ         reduce using rule 42 (Expression6)
+    LEQ         reduce using rule 42 (Expression6)
+    EQL         reduce using rule 42 (Expression6)
+    NEQ         reduce using rule 42 (Expression6)
+    LOR         reduce using rule 16 (Expression)
+    LOR         [reduce using rule 42 (Expression6)]
+    LAND        reduce using rule 42 (Expression6)
+    ASSIGN      reduce using rule 16 (Expression)
+    ASSIGN      [reduce using rule 42 (Expression6)]
+    ADD_ASSIGN  reduce using rule 16 (Expression)
+    ADD_ASSIGN  [reduce using rule 42 (Expression6)]
+    SUB_ASSIGN  reduce using rule 16 (Expression)
+    SUB_ASSIGN  [reduce using rule 42 (Expression6)]
+    MUL_ASSIGN  reduce using rule 16 (Expression)
+    MUL_ASSIGN  [reduce using rule 42 (Expression6)]
+    DIV_ASSIGN  reduce using rule 16 (Expression)
+    DIV_ASSIGN  [reduce using rule 42 (Expression6)]
+    REM_ASSIGN  reduce using rule 16 (Expression)
+    REM_ASSIGN  [reduce using rule 42 (Expression6)]
+    IF          reduce using rule 16 (Expression)
+    IF          [reduce using rule 42 (Expression6)]
+    FOR         reduce using rule 16 (Expression)
+    FOR         [reduce using rule 42 (Expression6)]
+    WHILE       reduce using rule 16 (Expression)
+    WHILE       [reduce using rule 42 (Expression6)]
+    SWITCH      reduce using rule 16 (Expression)
+    SWITCH      [reduce using rule 42 (Expression6)]
+    CASE        reduce using rule 16 (Expression)
+    CASE        [reduce using rule 42 (Expression6)]
+    PRINT       reduce using rule 16 (Expression)
+    PRINT       [reduce using rule 42 (Expression6)]
+    PRINTLN     reduce using rule 16 (Expression)
+    PRINTLN     [reduce using rule 42 (Expression6)]
+    ADDR        reduce using rule 16 (Expression)
+    ADDR        [reduce using rule 42 (Expression6)]
+    RETURN      reduce using rule 16 (Expression)
+    RETURN      [reduce using rule 42 (Expression6)]
+    BREAK       reduce using rule 16 (Expression)
+    BREAK       [reduce using rule 42 (Expression6)]
+    ID          reduce using rule 16 (Expression)
+    ID          [reduce using rule 42 (Expression6)]
+    LBRACE      reduce using rule 16 (Expression)
+    LBRACE      [reduce using rule 42 (Expression6)]
+    RBRACE      reduce using rule 16 (Expression)
+    RBRACE      [reduce using rule 42 (Expression6)]
+    LPAREN      reduce using rule 16 (Expression)
+    LPAREN      [reduce using rule 42 (Expression6)]
+    RPAREN      reduce using rule 16 (Expression)
+    RPAREN      [reduce using rule 42 (Expression6)]
+    INC         reduce using rule 16 (Expression)
+    INC         [reduce using rule 42 (Expression6)]
+    DEC         reduce using rule 16 (Expression)
+    DEC         [reduce using rule 42 (Expression6)]
+    SEMICOLON   reduce using rule 16 (Expression)
+    SEMICOLON   [reduce using rule 42 (Expression6)]
+    ADD         reduce using rule 42 (Expression6)
+    SUB         reduce using rule 42 (Expression6)
+    NOT         reduce using rule 16 (Expression)
+    NOT         [reduce using rule 42 (Expression6)]
+    MUL         reduce using rule 42 (Expression6)
+    DIV         reduce using rule 42 (Expression6)
+    REM         reduce using rule 42 (Expression6)
+    INT_LIT     reduce using rule 16 (Expression)
+    INT_LIT     [reduce using rule 42 (Expression6)]
+    FLOAT_LIT   reduce using rule 16 (Expression)
+    FLOAT_LIT   [reduce using rule 42 (Expression6)]
+    BOOL_LIT    reduce using rule 16 (Expression)
+    BOOL_LIT    [reduce using rule 42 (Expression6)]
+    STRING_LIT  reduce using rule 16 (Expression)
+    STRING_LIT  [reduce using rule 42 (Expression6)]
+    $default    reduce using rule 16 (Expression)
+
+
+State 64
+
+   46 UnaryExpr: functionCall .
+   93 Statement: functionCall . SEMICOLON
+
+    SEMICOLON  shift, and go to state 145
+
+    $default  reduce using rule 46 (UnaryExpr)
+
+
+State 65
+
+   44 UnaryExpr: PrimaryExpr .
+
+    $default  reduce using rule 44 (UnaryExpr)
+
+
+State 66
+
+   53 PrimaryExpr: ConversionExpr .
+
+    $default  reduce using rule 53 (PrimaryExpr)
+
+
+State 67
+
+   52 PrimaryExpr: Operand .
+
+    $default  reduce using rule 52 (PrimaryExpr)
+
+
+State 68
+
+   55 Operand: Literal .
+
+    $default  reduce using rule 55 (Operand)
+
+
+State 69
+
+   98 SimpleStmt: AssignmentStmt .
+
+    $default  reduce using rule 98 (SimpleStmt)
+
+
+State 70
+
+  100 SimpleStmt: IncDecStmt .
+
+    $default  reduce using rule 100 (SimpleStmt)
+
+
+State 71
+
+   79 StatementList: StatementList . Statement
+  159 FuncBlock: LBRACE StatementList . RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    RBRACE      shift, and go to state 146
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    Statement        go to state 147
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 72
+
+   80 StatementList: Statement .
+
+    $default  reduce using rule 80 (StatementList)
+
+
+State 73
+
+   94 Statement: LOOPStatement .
+
+    $default  reduce using rule 94 (Statement)
+
+
+State 74
+
+   81 Statement: DeclarationStmt .
+
+    $default  reduce using rule 81 (Statement)
+
+
+State 75
+
+   82 Statement: SimpleStmt .
+
+    $default  reduce using rule 82 (Statement)
+
+
+State 76
+
+   83 Statement: Block .
+
+    $default  reduce using rule 83 (Statement)
+
+
+State 77
+
+   84 Statement: IfStmt .
+
+    $default  reduce using rule 84 (Statement)
+
+
+State 78
+
+   92 Statement: WhileStmt .
+
+    $default  reduce using rule 92 (Statement)
+
+
+State 79
+
+   85 Statement: ForStmt .
+
+    $default  reduce using rule 85 (Statement)
+
+
+State 80
+
+   86 Statement: SwitchStmt .
+
+    $default  reduce using rule 86 (Statement)
+
+
+State 81
+
+   87 Statement: CaseStmt .
+
+    $default  reduce using rule 87 (Statement)
+
+
+State 82
+
+   88 Statement: LetStatement . LetStatementCon
+
+    ASSIGN  shift, and go to state 148
+
+    $default  reduce using rule 140 (LetStatementCon)
+
+    LetStatementCon  go to state 149
+
+
+State 83
+
+   89 Statement: PrintStmt .
+
+    $default  reduce using rule 89 (Statement)
+
+
+State 84
+
+   90 Statement: ReturnStmt .
+
+    $default  reduce using rule 90 (Statement)
+
+
+State 85
+
+   99 SimpleStmt: ExpressionStmt .
+
+    $default  reduce using rule 99 (SimpleStmt)
+
+
+State 86
+
+  155 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN ARROW Type . $@28 FuncBlock
+
+    $default  reduce using rule 154 ($@28)
+
+    $@28  go to state 150
+
+
+State 87
+
+  151 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN Type $@26 . FuncBlock
+
+    LBRACE  shift, and go to state 28
+
+    FuncBlock  go to state 151
+
+
+State 88
+
+  158 ParameterList: ParameterList COMMA ID COLON . Type
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+
+    Type  go to state 152
+
+
+State 89
+
+  153 FunctionDeclStmt: FuncOpen LPAREN RPAREN ARROW Type $@27 FuncBlock .
+
+    $default  reduce using rule 153 (FunctionDeclStmt)
+
+
+State 90
+
+  128 LetStatement: LET MUT . ID COLON Type ASSIGN Literal SEMICOLON
+  129             | LET MUT . ID COLON Type SEMICOLON
+  131             | LET MUT . ID COLON Type ASSIGN SEMICOLON
+  132             | LET MUT . ID ASSIGN Operand SEMICOLON
+
+    ID  shift, and go to state 153
+
+
+State 91
+
+  126 LetStatement: LET ID . COLON Type ASSIGN Operand SEMICOLON
+  127             | LET ID . COLON Type SEMICOLON
+  130             | LET ID . COLON Type ASSIGN SEMICOLON
+  134             | LET ID . COLON LBRACK Type SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON
+  135             | LET ID . ASSIGN Operand SEMICOLON
+  136             | LET ID . COLON Type ASSIGN LOOP Block SEMICOLON
+
+    ASSIGN  shift, and go to state 154
+    COLON   shift, and go to state 155
+
+
+State 92
+
+   48 functionCall: ID . LPAREN $@12 ParameterListInFunctionCall RPAREN
+   49             | ID . LPAREN RPAREN
+   56 Operand: ID .
+   59        | ID . $@13 LBRACK INT_LIT RBRACK
+
+    LPAREN  shift, and go to state 113
+
+    LBRACK    reduce using rule 58 ($@13)
+    LPAREN    [reduce using rule 56 (Operand)]
+    $default  reduce using rule 56 (Operand)
+
+    $@13  go to state 115
+
+
+State 93
+
+   18 Expression: Expression . LOR $@2 Expression2
+  121 Condition: Expression .
+
+    LOR  shift, and go to state 120
+
+    $default  reduce using rule 121 (Condition)
+
+
+State 94
+
+   46 UnaryExpr: functionCall .
+
+    $default  reduce using rule 46 (UnaryExpr)
+
+
+State 95
+
+  103 IfStmt: IF Condition . IfBlock ELSE IfStmt
+  104       | IF Condition . IfBlock
+  105       | IF Condition . IfBlock ELSE Block
+
+    LBRACE  shift, and go to state 156
+
+    IfBlock  go to state 157
+
+
+State 96
+
+   48 functionCall: ID . LPAREN $@12 ParameterListInFunctionCall RPAREN
+   49             | ID . LPAREN RPAREN
+   56 Operand: ID .
+   59        | ID . $@13 LBRACK INT_LIT RBRACK
+  119 ForClause: ID . IN Operand
+
+    IN      shift, and go to state 158
+    LPAREN  shift, and go to state 113
+
+    LBRACK    reduce using rule 58 ($@13)
+    $default  reduce using rule 56 (Operand)
+
+    $@13  go to state 115
+
+
+State 97
+
+   18 Expression: Expression . LOR $@2 Expression2
+   76 AssignmentStmt: Expression . assign_op Expression SEMICOLON
+   77 IncDecStmt: Expression . INC
+   78           | Expression . DEC
+  121 Condition: Expression .
+  160 ExpressionStmt: Expression .
+
+    LOR         shift, and go to state 120
+    ASSIGN      shift, and go to state 121
+    ADD_ASSIGN  shift, and go to state 122
+    SUB_ASSIGN  shift, and go to state 123
+    MUL_ASSIGN  shift, and go to state 124
+    DIV_ASSIGN  shift, and go to state 125
+    REM_ASSIGN  shift, and go to state 126
+    INC         shift, and go to state 127
+    DEC         shift, and go to state 128
+
+    SEMICOLON  reduce using rule 160 (ExpressionStmt)
+    $default   reduce using rule 121 (Condition)
+
+    assign_op  go to state 129
+
+
+State 98
+
+  120 InitStmt: SimpleStmt .
+
+    $default  reduce using rule 120 (InitStmt)
+
+
+State 99
+
+  116 ForStmt: FOR ForClause . Block ELSE Block
+  117        | FOR ForClause . LBRACE StatementList RBRACE
+
+    LBRACE  shift, and go to state 159
+
+    Block  go to state 160
+
+
+State 100
+
+  118 ForClause: InitStmt . SEMICOLON Condition SEMICOLON PostStmt
+
+    SEMICOLON  shift, and go to state 161
+
+
+State 101
+
+  115 ForStmt: FOR Condition . Block ELSE Block
+
+    LBRACE  shift, and go to state 48
+
+    Block  go to state 162
+
+
+State 102
+
+  112 WhileStmt: WHILE $@19 . Condition $@20 WhileBlock
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 93
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+    Condition       go to state 163
+
+
+State 103
+
+   18 Expression: Expression . LOR $@2 Expression2
+  123 SwitchStmt: SWITCH Expression .
+
+    LOR  shift, and go to state 120
+
+    $default  reduce using rule 123 (SwitchStmt)
+
+
+State 104
+
+  125 CaseStmt: CASE DEFAULT . COLON Block
+
+    COLON  shift, and go to state 164
+
+
+State 105
+
+  124 CaseStmt: CASE INT_LIT . COLON Block
+
+    COLON  shift, and go to state 165
+
+
+State 106
+
+   18 Expression: Expression . LOR $@2 Expression2
+  142 PrintStmt: PRINT Expression . $@23 SEMICOLON
+
+    LOR  shift, and go to state 120
+
+    $default  reduce using rule 141 ($@23)
+
+    $@23  go to state 166
+
+
+State 107
+
+   18 Expression: Expression . LOR $@2 Expression2
+  144 PrintStmt: PRINTLN Expression . $@24 SEMICOLON
+
+    LOR  shift, and go to state 120
+
+    $default  reduce using rule 143 ($@24)
+
+    $@24  go to state 167
+
+
+State 108
+
+   57 Operand: ADDR . Operand LBRACK Interindex RBRACK
+
+    ADDR        shift, and go to state 108
+    ID          shift, and go to state 109
+    LPAREN      shift, and go to state 49
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Operand  go to state 110
+    Literal  go to state 68
+
+
+State 109
+
+   56 Operand: ID .
+   59        | ID . $@13 LBRACK INT_LIT RBRACK
+
+    LBRACK    reduce using rule 56 (Operand)
+    LBRACK    [reduce using rule 58 ($@13)]
+    $default  reduce using rule 56 (Operand)
+
+    $@13  go to state 115
+
+
+State 110
+
+   57 Operand: ADDR Operand . LBRACK Interindex RBRACK
+
+    LBRACK  shift, and go to state 168
+
+
+State 111
+
+   18 Expression: Expression . LOR $@2 Expression2
+  145 ReturnStmt: RETURN Expression . SEMICOLON
+
+    LOR        shift, and go to state 120
+    SEMICOLON  shift, and go to state 169
+
+
+State 112
+
+   95 LOOPStatement: BREAK Literal . SEMICOLON
+
+    SEMICOLON  shift, and go to state 170
+
+
+State 113
+
+   48 functionCall: ID LPAREN . $@12 ParameterListInFunctionCall RPAREN
+   49             | ID LPAREN . RPAREN
+
+    RPAREN  shift, and go to state 171
+
+    $default  reduce using rule 47 ($@12)
+
+    $@12  go to state 172
+
+
+State 114
+
+   96 DeclarationStmt: ID Type .
+   97                | ID Type . assign_op Expression
+
+    ASSIGN      shift, and go to state 121
+    ADD_ASSIGN  shift, and go to state 122
+    SUB_ASSIGN  shift, and go to state 123
+    MUL_ASSIGN  shift, and go to state 124
+    DIV_ASSIGN  shift, and go to state 125
+    REM_ASSIGN  shift, and go to state 126
+
+    $default  reduce using rule 96 (DeclarationStmt)
+
+    assign_op  go to state 173
+
+
+State 115
+
+   59 Operand: ID $@13 . LBRACK INT_LIT RBRACK
+
+    LBRACK  shift, and go to state 174
+
+
+State 116
+
+  102 Block: LBRACE $@16 . StatementList RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    StatementList    go to state 175
+    Statement        go to state 72
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 117
+
+   18 Expression: Expression . LOR $@2 Expression2
+   60 Operand: LPAREN Expression . RPAREN
+
+    LOR     shift, and go to state 120
+    RPAREN  shift, and go to state 176
+
+
+State 118
+
+   54 ConversionExpr: Type LPAREN . Expression RPAREN
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 177
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 119
+
+   45 UnaryExpr: unary_op UnaryExpr .
+
+    $default  reduce using rule 45 (UnaryExpr)
+
+
+State 120
+
+   18 Expression: Expression LOR . $@2 Expression2
+
+    $default  reduce using rule 17 ($@2)
+
+    $@2  go to state 178
+
+
+State 121
+
+   70 assign_op: ASSIGN .
+
+    $default  reduce using rule 70 (assign_op)
+
+
+State 122
+
+   71 assign_op: ADD_ASSIGN .
+
+    $default  reduce using rule 71 (assign_op)
+
+
+State 123
+
+   72 assign_op: SUB_ASSIGN .
+
+    $default  reduce using rule 72 (assign_op)
+
+
+State 124
+
+   73 assign_op: MUL_ASSIGN .
+
+    $default  reduce using rule 73 (assign_op)
+
+
+State 125
+
+   74 assign_op: DIV_ASSIGN .
+
+    $default  reduce using rule 74 (assign_op)
+
+
+State 126
+
+   75 assign_op: REM_ASSIGN .
+
+    $default  reduce using rule 75 (assign_op)
+
+
+State 127
+
+   77 IncDecStmt: Expression INC .
+
+    $default  reduce using rule 77 (IncDecStmt)
+
+
+State 128
+
+   78 IncDecStmt: Expression DEC .
+
+    $default  reduce using rule 78 (IncDecStmt)
+
+
+State 129
+
+   76 AssignmentStmt: Expression assign_op . Expression SEMICOLON
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 179
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 130
+
+   21 Expression2: Expression2 LAND . $@3 Expression3
+
+    $default  reduce using rule 20 ($@3)
+
+    $@3  go to state 180
+
+
+State 131
+
+   32 Expression3: Expression3 GTR . $@8 Expression4
+
+    $default  reduce using rule 31 ($@8)
+
+    $@8  go to state 181
+
+
+State 132
+
+   28 Expression3: Expression3 LSS . $@6 Expression4
+
+    $default  reduce using rule 27 ($@6)
+
+    $@6  go to state 182
+
+
+State 133
+
+   34 Expression3: Expression3 GEQ . $@9 Expression4
+
+    $default  reduce using rule 33 ($@9)
+
+    $@9  go to state 183
+
+
+State 134
+
+   30 Expression3: Expression3 LEQ . $@7 Expression4
+
+    $default  reduce using rule 29 ($@7)
+
+    $@7  go to state 184
+
+
+State 135
+
+   24 Expression3: Expression3 EQL . $@4 Expression4
+
+    $default  reduce using rule 23 ($@4)
+
+    $@4  go to state 185
+
+
+State 136
+
+   26 Expression3: Expression3 NEQ . $@5 Expression4
+
+    $default  reduce using rule 25 ($@5)
+
+    $@5  go to state 186
+
+
+State 137
+
+   10 add_op: ADD .
+
+    $default  reduce using rule 10 (add_op)
+
+
+State 138
+
+   11 add_op: SUB .
+
+    $default  reduce using rule 11 (add_op)
+
+
+State 139
+
+   37 Expression4: Expression4 add_op . $@10 Expression5
+
+    $default  reduce using rule 36 ($@10)
+
+    $@10  go to state 187
+
+
+State 140
+
+   12 mul_op: MUL .
+
+    $default  reduce using rule 12 (mul_op)
+
+
+State 141
+
+   13 mul_op: DIV .
+
+    $default  reduce using rule 13 (mul_op)
+
+
+State 142
+
+   14 mul_op: REM .
+
+    $default  reduce using rule 14 (mul_op)
+
+
+State 143
+
+   40 Expression5: Expression5 mul_op . $@11 Expression6
+
+    $default  reduce using rule 39 ($@11)
+
+    $@11  go to state 188
+
+
+State 144
+
+   43 Expression6: UnaryExpr AS . Type
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+
+    Type  go to state 189
+
+
+State 145
+
+   93 Statement: functionCall SEMICOLON .
+
+    $default  reduce using rule 93 (Statement)
+
+
+State 146
+
+  159 FuncBlock: LBRACE StatementList RBRACE .
+
+    $default  reduce using rule 159 (FuncBlock)
+
+
+State 147
+
+   79 StatementList: StatementList Statement .
+
+    $default  reduce using rule 79 (StatementList)
+
+
+State 148
+
+  139 LetStatementCon: ASSIGN . Literal SEMICOLON
+
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Literal  go to state 190
+
+
+State 149
+
+   88 Statement: LetStatement LetStatementCon .
+
+    $default  reduce using rule 88 (Statement)
+
+
+State 150
+
+  155 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN ARROW Type $@28 . FuncBlock
+
+    LBRACE  shift, and go to state 28
+
+    FuncBlock  go to state 191
+
+
+State 151
+
+  151 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN Type $@26 FuncBlock .
+
+    $default  reduce using rule 151 (FunctionDeclStmt)
+
+
+State 152
+
+  158 ParameterList: ParameterList COMMA ID COLON Type .
+
+    $default  reduce using rule 158 (ParameterList)
+
+
+State 153
+
+  128 LetStatement: LET MUT ID . COLON Type ASSIGN Literal SEMICOLON
+  129             | LET MUT ID . COLON Type SEMICOLON
+  131             | LET MUT ID . COLON Type ASSIGN SEMICOLON
+  132             | LET MUT ID . ASSIGN Operand SEMICOLON
+
+    ASSIGN  shift, and go to state 192
+    COLON   shift, and go to state 193
+
+
+State 154
+
+  135 LetStatement: LET ID ASSIGN . Operand SEMICOLON
+
+    ADDR        shift, and go to state 108
+    ID          shift, and go to state 109
+    LPAREN      shift, and go to state 49
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Operand  go to state 194
+    Literal  go to state 68
+
+
+State 155
+
+  126 LetStatement: LET ID COLON . Type ASSIGN Operand SEMICOLON
+  127             | LET ID COLON . Type SEMICOLON
+  130             | LET ID COLON . Type ASSIGN SEMICOLON
+  134             | LET ID COLON . LBRACK Type SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON
+  136             | LET ID COLON . Type ASSIGN LOOP Block SEMICOLON
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+    LBRACK  shift, and go to state 195
+
+    Type  go to state 196
+
+
+State 156
+
+  107 IfBlock: LBRACE . $@17 StatementList RBRACE
+  109        | LBRACE . $@18 RBRACE
+
+    RBRACE    reduce using rule 108 ($@18)
+    $default  reduce using rule 106 ($@17)
+
+    $@17  go to state 197
+    $@18  go to state 198
+
+
+State 157
+
+  103 IfStmt: IF Condition IfBlock . ELSE IfStmt
+  104       | IF Condition IfBlock .
+  105       | IF Condition IfBlock . ELSE Block
+
+    ELSE  shift, and go to state 199
+
+    $default  reduce using rule 104 (IfStmt)
+
+
+State 158
+
+  119 ForClause: ID IN . Operand
+
+    ADDR        shift, and go to state 108
+    ID          shift, and go to state 109
+    LPAREN      shift, and go to state 49
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Operand  go to state 200
+    Literal  go to state 68
+
+
+State 159
+
+  102 Block: LBRACE . $@16 StatementList RBRACE
+  117 ForStmt: FOR ForClause LBRACE . StatementList RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    LET         [reduce using rule 101 ($@16)]
+    NEWLINE     [reduce using rule 101 ($@16)]
+    INT         [reduce using rule 101 ($@16)]
+    FLOAT       [reduce using rule 101 ($@16)]
+    BOOL        [reduce using rule 101 ($@16)]
+    STRING      [reduce using rule 101 ($@16)]
+    IF          [reduce using rule 101 ($@16)]
+    FOR         [reduce using rule 101 ($@16)]
+    WHILE       [reduce using rule 101 ($@16)]
+    SWITCH      [reduce using rule 101 ($@16)]
+    CASE        [reduce using rule 101 ($@16)]
+    PRINT       [reduce using rule 101 ($@16)]
+    PRINTLN     [reduce using rule 101 ($@16)]
+    ADDR        [reduce using rule 101 ($@16)]
+    RETURN      [reduce using rule 101 ($@16)]
+    BREAK       [reduce using rule 101 ($@16)]
+    ID          [reduce using rule 101 ($@16)]
+    LBRACE      [reduce using rule 101 ($@16)]
+    LPAREN      [reduce using rule 101 ($@16)]
+    NOT         [reduce using rule 101 ($@16)]
+    INT_LIT     [reduce using rule 101 ($@16)]
+    FLOAT_LIT   [reduce using rule 101 ($@16)]
+    BOOL_LIT    [reduce using rule 101 ($@16)]
+    STRING_LIT  [reduce using rule 101 ($@16)]
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    StatementList    go to state 201
+    Statement        go to state 72
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    $@16             go to state 116
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 160
+
+  116 ForStmt: FOR ForClause Block . ELSE Block
+
+    ELSE  shift, and go to state 202
+
+
+State 161
+
+  118 ForClause: InitStmt SEMICOLON . Condition SEMICOLON PostStmt
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 93
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+    Condition       go to state 203
+
+
+State 162
+
+  115 ForStmt: FOR Condition Block . ELSE Block
+
+    ELSE  shift, and go to state 204
+
+
+State 163
+
+  112 WhileStmt: WHILE $@19 Condition . $@20 WhileBlock
+
+    $default  reduce using rule 111 ($@20)
+
+    $@20  go to state 205
+
+
+State 164
+
+  125 CaseStmt: CASE DEFAULT COLON . Block
+
+    LBRACE  shift, and go to state 48
+
+    Block  go to state 206
+
+
+State 165
+
+  124 CaseStmt: CASE INT_LIT COLON . Block
+
+    LBRACE  shift, and go to state 48
+
+    Block  go to state 207
+
+
+State 166
+
+  142 PrintStmt: PRINT Expression $@23 . SEMICOLON
+
+    SEMICOLON  shift, and go to state 208
+
+
+State 167
+
+  144 PrintStmt: PRINTLN Expression $@24 . SEMICOLON
+
+    SEMICOLON  shift, and go to state 209
+
+
+State 168
+
+   57 Operand: ADDR Operand LBRACK . Interindex RBRACK
+
+    DOTDOT      shift, and go to state 210
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Interindex  go to state 211
+    Literal     go to state 212
+
+
+State 169
+
+  145 ReturnStmt: RETURN Expression SEMICOLON .
+
+    $default  reduce using rule 145 (ReturnStmt)
+
+
+State 170
+
+   95 LOOPStatement: BREAK Literal SEMICOLON .
+
+    $default  reduce using rule 95 (LOOPStatement)
+
+
+State 171
+
+   49 functionCall: ID LPAREN RPAREN .
+
+    $default  reduce using rule 49 (functionCall)
+
+
+State 172
+
+   48 functionCall: ID LPAREN $@12 . ParameterListInFunctionCall RPAREN
+
+    ADDR        shift, and go to state 108
+    ID          shift, and go to state 109
+    LPAREN      shift, and go to state 49
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    ParameterListInFunctionCall  go to state 213
+    Operand                      go to state 214
+    Literal                      go to state 68
+
+
+State 173
+
+   97 DeclarationStmt: ID Type assign_op . Expression
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 215
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 174
+
+   59 Operand: ID $@13 LBRACK . INT_LIT RBRACK
+
+    INT_LIT  shift, and go to state 216
+
+
+State 175
+
+   79 StatementList: StatementList . Statement
+  102 Block: LBRACE $@16 StatementList . RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    RBRACE      shift, and go to state 217
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    Statement        go to state 147
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 176
+
+   60 Operand: LPAREN Expression RPAREN .
+
+    $default  reduce using rule 60 (Operand)
+
+
+State 177
+
+   18 Expression: Expression . LOR $@2 Expression2
+   54 ConversionExpr: Type LPAREN Expression . RPAREN
+
+    LOR     shift, and go to state 120
+    RPAREN  shift, and go to state 218
+
+
+State 178
+
+   18 Expression: Expression LOR $@2 . Expression2
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression2     go to state 219
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 179
+
+   18 Expression: Expression . LOR $@2 Expression2
+   76 AssignmentStmt: Expression assign_op Expression . SEMICOLON
+
+    LOR        shift, and go to state 120
+    SEMICOLON  shift, and go to state 221
+
+
+State 180
+
+   21 Expression2: Expression2 LAND $@3 . Expression3
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression3     go to state 222
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 181
+
+   32 Expression3: Expression3 GTR $@8 . Expression4
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression4     go to state 223
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 182
+
+   28 Expression3: Expression3 LSS $@6 . Expression4
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression4     go to state 224
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 183
+
+   34 Expression3: Expression3 GEQ $@9 . Expression4
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression4     go to state 225
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 184
+
+   30 Expression3: Expression3 LEQ $@7 . Expression4
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression4     go to state 226
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 185
+
+   24 Expression3: Expression3 EQL $@4 . Expression4
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression4     go to state 227
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 186
+
+   26 Expression3: Expression3 NEQ $@5 . Expression4
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression4     go to state 228
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 187
+
+   37 Expression4: Expression4 add_op $@10 . Expression5
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression5     go to state 229
+    Expression6     go to state 62
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 188
+
+   40 Expression5: Expression5 mul_op $@11 . Expression6
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression6     go to state 230
+    UnaryExpr       go to state 220
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+
+
+State 189
+
+   43 Expression6: UnaryExpr AS Type .
+
+    $default  reduce using rule 43 (Expression6)
+
+
+State 190
+
+  139 LetStatementCon: ASSIGN Literal . SEMICOLON
+
+    SEMICOLON  shift, and go to state 231
+
+
+State 191
+
+  155 FunctionDeclStmt: FuncOpen LPAREN ParameterList RPAREN ARROW Type $@28 FuncBlock .
+
+    $default  reduce using rule 155 (FunctionDeclStmt)
+
+
+State 192
+
+  132 LetStatement: LET MUT ID ASSIGN . Operand SEMICOLON
+
+    ADDR        shift, and go to state 108
+    ID          shift, and go to state 109
+    LPAREN      shift, and go to state 49
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Operand  go to state 232
+    Literal  go to state 68
+
+
+State 193
+
+  128 LetStatement: LET MUT ID COLON . Type ASSIGN Literal SEMICOLON
+  129             | LET MUT ID COLON . Type SEMICOLON
+  131             | LET MUT ID COLON . Type ASSIGN SEMICOLON
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+
+    Type  go to state 233
+
+
+State 194
+
+  135 LetStatement: LET ID ASSIGN Operand . SEMICOLON
+
+    SEMICOLON  shift, and go to state 234
+
+
+State 195
+
+  134 LetStatement: LET ID COLON LBRACK . Type SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON
+
+    INT     shift, and go to state 21
+    FLOAT   shift, and go to state 22
+    BOOL    shift, and go to state 23
+    STRING  shift, and go to state 24
+    ADDR    shift, and go to state 25
+
+    Type  go to state 235
+
+
+State 196
+
+  126 LetStatement: LET ID COLON Type . ASSIGN Operand SEMICOLON
+  127             | LET ID COLON Type . SEMICOLON
+  130             | LET ID COLON Type . ASSIGN SEMICOLON
+  136             | LET ID COLON Type . ASSIGN LOOP Block SEMICOLON
+
+    ASSIGN     shift, and go to state 236
+    SEMICOLON  shift, and go to state 237
+
+
+State 197
+
+  107 IfBlock: LBRACE $@17 . StatementList RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    StatementList    go to state 238
+    Statement        go to state 72
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 198
+
+  109 IfBlock: LBRACE $@18 . RBRACE
+
+    RBRACE  shift, and go to state 239
+
+
+State 199
+
+  103 IfStmt: IF Condition IfBlock ELSE . IfStmt
+  105       | IF Condition IfBlock ELSE . Block
+
+    IF      shift, and go to state 37
+    LBRACE  shift, and go to state 48
+
+    Block   go to state 240
+    IfStmt  go to state 241
+
+
+State 200
+
+  119 ForClause: ID IN Operand .
+
+    $default  reduce using rule 119 (ForClause)
+
+
+State 201
+
+   79 StatementList: StatementList . Statement
+  117 ForStmt: FOR ForClause LBRACE StatementList . RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    RBRACE      shift, and go to state 242
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    Statement        go to state 147
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 202
+
+  116 ForStmt: FOR ForClause Block ELSE . Block
+
+    LBRACE  shift, and go to state 48
+
+    Block  go to state 243
+
+
+State 203
+
+  118 ForClause: InitStmt SEMICOLON Condition . SEMICOLON PostStmt
+
+    SEMICOLON  shift, and go to state 244
+
+
+State 204
+
+  115 ForStmt: FOR Condition Block ELSE . Block
+
+    LBRACE  shift, and go to state 48
+
+    Block  go to state 245
+
+
+State 205
+
+  112 WhileStmt: WHILE $@19 Condition $@20 . WhileBlock
+
+    LBRACE  shift, and go to state 246
+
+    WhileBlock  go to state 247
+
+
+State 206
+
+  125 CaseStmt: CASE DEFAULT COLON Block .
+
+    $default  reduce using rule 125 (CaseStmt)
+
+
+State 207
+
+  124 CaseStmt: CASE INT_LIT COLON Block .
+
+    $default  reduce using rule 124 (CaseStmt)
+
+
+State 208
+
+  142 PrintStmt: PRINT Expression $@23 SEMICOLON .
+
+    $default  reduce using rule 142 (PrintStmt)
+
+
+State 209
+
+  144 PrintStmt: PRINTLN Expression $@24 SEMICOLON .
+
+    $default  reduce using rule 144 (PrintStmt)
+
+
+State 210
+
+   62 Interindex: DOTDOT . $@14 Literal
+
+    $default  reduce using rule 61 ($@14)
+
+    $@14  go to state 248
+
+
+State 211
+
+   57 Operand: ADDR Operand LBRACK Interindex . RBRACK
+
+    RBRACK  shift, and go to state 249
+
+
+State 212
+
+   64 Interindex: Literal . DOTDOT $@15 Literal
+   65           | Literal . DOTDOT
+
+    DOTDOT  shift, and go to state 250
+
+
+State 213
+
+   48 functionCall: ID LPAREN $@12 ParameterListInFunctionCall . RPAREN
+
+    RPAREN  shift, and go to state 251
+
+
+State 214
+
+   50 ParameterListInFunctionCall: Operand .
+   51                            | Operand . COMMA ParameterListInFunctionCall
+
+    COMMA  shift, and go to state 252
+
+    $default  reduce using rule 50 (ParameterListInFunctionCall)
+
+
+State 215
+
+   18 Expression: Expression . LOR $@2 Expression2
+   97 DeclarationStmt: ID Type assign_op Expression .
+
+    LOR  shift, and go to state 120
+
+    $default  reduce using rule 97 (DeclarationStmt)
+
+
+State 216
+
+   59 Operand: ID $@13 LBRACK INT_LIT . RBRACK
+
+    RBRACK  shift, and go to state 253
+
+
+State 217
+
+  102 Block: LBRACE $@16 StatementList RBRACE .
+
+    $default  reduce using rule 102 (Block)
+
+
+State 218
+
+   54 ConversionExpr: Type LPAREN Expression RPAREN .
+
+    $default  reduce using rule 54 (ConversionExpr)
+
+
+State 219
+
+   18 Expression: Expression LOR $@2 Expression2 .
+   21 Expression2: Expression2 . LAND $@3 Expression3
+
+    LAND  shift, and go to state 130
+
+    $default  reduce using rule 18 (Expression)
+
+
+State 220
+
+   42 Expression6: UnaryExpr .
+   43            | UnaryExpr . AS Type
+
+    AS  shift, and go to state 144
+
+    $default  reduce using rule 42 (Expression6)
+
+
+State 221
+
+   76 AssignmentStmt: Expression assign_op Expression SEMICOLON .
+
+    $default  reduce using rule 76 (AssignmentStmt)
+
+
+State 222
+
+   21 Expression2: Expression2 LAND $@3 Expression3 .
+   24 Expression3: Expression3 . EQL $@4 Expression4
+   26            | Expression3 . NEQ $@5 Expression4
+   28            | Expression3 . LSS $@6 Expression4
+   30            | Expression3 . LEQ $@7 Expression4
+   32            | Expression3 . GTR $@8 Expression4
+   34            | Expression3 . GEQ $@9 Expression4
+
+    GTR  shift, and go to state 131
+    LSS  shift, and go to state 132
+    GEQ  shift, and go to state 133
+    LEQ  shift, and go to state 134
+    EQL  shift, and go to state 135
+    NEQ  shift, and go to state 136
+
+    $default  reduce using rule 21 (Expression2)
+
+
+State 223
+
+   32 Expression3: Expression3 GTR $@8 Expression4 .
+   37 Expression4: Expression4 . add_op $@10 Expression5
+
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+
+    $default  reduce using rule 32 (Expression3)
+
+    add_op  go to state 139
+
+
+State 224
+
+   28 Expression3: Expression3 LSS $@6 Expression4 .
+   37 Expression4: Expression4 . add_op $@10 Expression5
+
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+
+    $default  reduce using rule 28 (Expression3)
+
+    add_op  go to state 139
+
+
+State 225
+
+   34 Expression3: Expression3 GEQ $@9 Expression4 .
+   37 Expression4: Expression4 . add_op $@10 Expression5
+
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+
+    $default  reduce using rule 34 (Expression3)
+
+    add_op  go to state 139
+
+
+State 226
+
+   30 Expression3: Expression3 LEQ $@7 Expression4 .
+   37 Expression4: Expression4 . add_op $@10 Expression5
+
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+
+    $default  reduce using rule 30 (Expression3)
+
+    add_op  go to state 139
+
+
+State 227
+
+   24 Expression3: Expression3 EQL $@4 Expression4 .
+   37 Expression4: Expression4 . add_op $@10 Expression5
+
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+
+    $default  reduce using rule 24 (Expression3)
+
+    add_op  go to state 139
+
+
+State 228
+
+   26 Expression3: Expression3 NEQ $@5 Expression4 .
+   37 Expression4: Expression4 . add_op $@10 Expression5
+
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+
+    $default  reduce using rule 26 (Expression3)
+
+    add_op  go to state 139
+
+
+State 229
+
+   37 Expression4: Expression4 add_op $@10 Expression5 .
+   40 Expression5: Expression5 . mul_op $@11 Expression6
+
+    MUL  shift, and go to state 140
+    DIV  shift, and go to state 141
+    REM  shift, and go to state 142
+
+    $default  reduce using rule 37 (Expression4)
+
+    mul_op  go to state 143
+
+
+State 230
+
+   40 Expression5: Expression5 mul_op $@11 Expression6 .
+
+    $default  reduce using rule 40 (Expression5)
+
+
+State 231
+
+  139 LetStatementCon: ASSIGN Literal SEMICOLON .
+
+    $default  reduce using rule 139 (LetStatementCon)
+
+
+State 232
+
+  132 LetStatement: LET MUT ID ASSIGN Operand . SEMICOLON
+
+    SEMICOLON  shift, and go to state 254
+
+
+State 233
+
+  128 LetStatement: LET MUT ID COLON Type . ASSIGN Literal SEMICOLON
+  129             | LET MUT ID COLON Type . SEMICOLON
+  131             | LET MUT ID COLON Type . ASSIGN SEMICOLON
+
+    ASSIGN     shift, and go to state 255
+    SEMICOLON  shift, and go to state 256
+
+
+State 234
+
+  135 LetStatement: LET ID ASSIGN Operand SEMICOLON .
+
+    $default  reduce using rule 135 (LetStatement)
+
+
+State 235
+
+  134 LetStatement: LET ID COLON LBRACK Type . SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON
+
+    SEMICOLON  shift, and go to state 257
+
+
+State 236
+
+  126 LetStatement: LET ID COLON Type ASSIGN . Operand SEMICOLON
+  130             | LET ID COLON Type ASSIGN . SEMICOLON
+  136             | LET ID COLON Type ASSIGN . LOOP Block SEMICOLON
+
+    LOOP        shift, and go to state 258
+    ADDR        shift, and go to state 108
+    ID          shift, and go to state 109
+    LPAREN      shift, and go to state 49
+    SEMICOLON   shift, and go to state 259
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Operand  go to state 260
+    Literal  go to state 68
+
+
+State 237
+
+  127 LetStatement: LET ID COLON Type SEMICOLON .
+
+    $default  reduce using rule 127 (LetStatement)
+
+
+State 238
+
+   79 StatementList: StatementList . Statement
+  107 IfBlock: LBRACE $@17 StatementList . RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    RBRACE      shift, and go to state 261
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    Statement        go to state 147
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 239
+
+  109 IfBlock: LBRACE $@18 RBRACE .
+
+    $default  reduce using rule 109 (IfBlock)
+
+
+State 240
+
+  105 IfStmt: IF Condition IfBlock ELSE Block .
+
+    $default  reduce using rule 105 (IfStmt)
+
+
+State 241
+
+  103 IfStmt: IF Condition IfBlock ELSE IfStmt .
+
+    $default  reduce using rule 103 (IfStmt)
+
+
+State 242
+
+  117 ForStmt: FOR ForClause LBRACE StatementList RBRACE .
+
+    $default  reduce using rule 117 (ForStmt)
+
+
+State 243
+
+  116 ForStmt: FOR ForClause Block ELSE Block .
+
+    $default  reduce using rule 116 (ForStmt)
+
+
+State 244
+
+  118 ForClause: InitStmt SEMICOLON Condition SEMICOLON . PostStmt
+
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    ADDR        shift, and go to state 44
+    ID          shift, and go to state 92
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type            go to state 55
+    unary_op        go to state 56
+    Expression      go to state 57
+    Expression2     go to state 58
+    Expression3     go to state 59
+    Expression4     go to state 60
+    Expression5     go to state 61
+    Expression6     go to state 62
+    UnaryExpr       go to state 63
+    functionCall    go to state 94
+    PrimaryExpr     go to state 65
+    ConversionExpr  go to state 66
+    Operand         go to state 67
+    Literal         go to state 68
+    AssignmentStmt  go to state 69
+    IncDecStmt      go to state 70
+    SimpleStmt      go to state 262
+    PostStmt        go to state 263
+    ExpressionStmt  go to state 85
+
+
+State 245
+
+  115 ForStmt: FOR Condition Block ELSE Block .
+
+    $default  reduce using rule 115 (ForStmt)
+
+
+State 246
+
+  114 WhileBlock: LBRACE . $@21 StatementList RBRACE
+
+    $default  reduce using rule 113 ($@21)
+
+    $@21  go to state 264
+
+
+State 247
+
+  112 WhileStmt: WHILE $@19 Condition $@20 WhileBlock .
+
+    $default  reduce using rule 112 (WhileStmt)
+
+
+State 248
+
+   62 Interindex: DOTDOT $@14 . Literal
+
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Literal  go to state 265
+
+
+State 249
+
+   57 Operand: ADDR Operand LBRACK Interindex RBRACK .
+
+    $default  reduce using rule 57 (Operand)
+
+
+State 250
+
+   64 Interindex: Literal DOTDOT . $@15 Literal
+   65           | Literal DOTDOT .
+
+    RBRACK    reduce using rule 65 (Interindex)
+    $default  reduce using rule 63 ($@15)
+
+    $@15  go to state 266
+
+
+State 251
+
+   48 functionCall: ID LPAREN $@12 ParameterListInFunctionCall RPAREN .
+
+    $default  reduce using rule 48 (functionCall)
+
+
+State 252
+
+   51 ParameterListInFunctionCall: Operand COMMA . ParameterListInFunctionCall
+
+    ADDR        shift, and go to state 108
+    ID          shift, and go to state 109
+    LPAREN      shift, and go to state 49
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    ParameterListInFunctionCall  go to state 267
+    Operand                      go to state 214
+    Literal                      go to state 68
+
+
+State 253
+
+   59 Operand: ID $@13 LBRACK INT_LIT RBRACK .
+
+    $default  reduce using rule 59 (Operand)
+
+
+State 254
+
+  132 LetStatement: LET MUT ID ASSIGN Operand SEMICOLON .
+
+    $default  reduce using rule 132 (LetStatement)
+
+
+State 255
+
+  128 LetStatement: LET MUT ID COLON Type ASSIGN . Literal SEMICOLON
+  131             | LET MUT ID COLON Type ASSIGN . SEMICOLON
+
+    SEMICOLON   shift, and go to state 268
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Literal  go to state 269
+
+
+State 256
+
+  129 LetStatement: LET MUT ID COLON Type SEMICOLON .
+
+    $default  reduce using rule 129 (LetStatement)
+
+
+State 257
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON . Operand RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON
+
+    ADDR        shift, and go to state 108
+    ID          shift, and go to state 109
+    LPAREN      shift, and go to state 49
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Operand  go to state 270
+    Literal  go to state 68
+
+
+State 258
+
+  136 LetStatement: LET ID COLON Type ASSIGN LOOP . Block SEMICOLON
+
+    LBRACE  shift, and go to state 48
+
+    Block  go to state 271
+
+
+State 259
+
+  130 LetStatement: LET ID COLON Type ASSIGN SEMICOLON .
+
+    $default  reduce using rule 130 (LetStatement)
+
+
+State 260
+
+  126 LetStatement: LET ID COLON Type ASSIGN Operand . SEMICOLON
+
+    SEMICOLON  shift, and go to state 272
+
+
+State 261
+
+  107 IfBlock: LBRACE $@17 StatementList RBRACE .
+
+    $default  reduce using rule 107 (IfBlock)
+
+
+State 262
+
+  122 PostStmt: SimpleStmt .
+
+    $default  reduce using rule 122 (PostStmt)
+
+
+State 263
+
+  118 ForClause: InitStmt SEMICOLON Condition SEMICOLON PostStmt .
+
+    $default  reduce using rule 118 (ForClause)
+
+
+State 264
+
+  114 WhileBlock: LBRACE $@21 . StatementList RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    StatementList    go to state 273
+    Statement        go to state 72
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 265
+
+   62 Interindex: DOTDOT $@14 Literal .
+
+    $default  reduce using rule 62 (Interindex)
+
+
+State 266
+
+   64 Interindex: Literal DOTDOT $@15 . Literal
+
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Literal  go to state 274
+
+
+State 267
+
+   51 ParameterListInFunctionCall: Operand COMMA ParameterListInFunctionCall .
+
+    $default  reduce using rule 51 (ParameterListInFunctionCall)
+
+
+State 268
+
+  131 LetStatement: LET MUT ID COLON Type ASSIGN SEMICOLON .
+
+    $default  reduce using rule 131 (LetStatement)
+
+
+State 269
+
+  128 LetStatement: LET MUT ID COLON Type ASSIGN Literal . SEMICOLON
+
+    SEMICOLON  shift, and go to state 275
+
+
+State 270
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON Operand . RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON
+
+    RBRACK  shift, and go to state 276
+
+
+State 271
+
+  136 LetStatement: LET ID COLON Type ASSIGN LOOP Block . SEMICOLON
+
+    SEMICOLON  shift, and go to state 277
+
+
+State 272
+
+  126 LetStatement: LET ID COLON Type ASSIGN Operand SEMICOLON .
+
+    $default  reduce using rule 126 (LetStatement)
+
+
+State 273
+
+   79 StatementList: StatementList . Statement
+  114 WhileBlock: LBRACE $@21 StatementList . RBRACE
+
+    LET         shift, and go to state 35
+    NEWLINE     shift, and go to state 36
+    INT         shift, and go to state 21
+    FLOAT       shift, and go to state 22
+    BOOL        shift, and go to state 23
+    STRING      shift, and go to state 24
+    IF          shift, and go to state 37
+    FOR         shift, and go to state 38
+    WHILE       shift, and go to state 39
+    SWITCH      shift, and go to state 40
+    CASE        shift, and go to state 41
+    PRINT       shift, and go to state 42
+    PRINTLN     shift, and go to state 43
+    ADDR        shift, and go to state 44
+    RETURN      shift, and go to state 45
+    BREAK       shift, and go to state 46
+    ID          shift, and go to state 47
+    LBRACE      shift, and go to state 48
+    RBRACE      shift, and go to state 278
+    LPAREN      shift, and go to state 49
+    NOT         shift, and go to state 50
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Type             go to state 55
+    unary_op         go to state 56
+    Expression       go to state 57
+    Expression2      go to state 58
+    Expression3      go to state 59
+    Expression4      go to state 60
+    Expression5      go to state 61
+    Expression6      go to state 62
+    UnaryExpr        go to state 63
+    functionCall     go to state 64
+    PrimaryExpr      go to state 65
+    ConversionExpr   go to state 66
+    Operand          go to state 67
+    Literal          go to state 68
+    AssignmentStmt   go to state 69
+    IncDecStmt       go to state 70
+    Statement        go to state 147
+    LOOPStatement    go to state 73
+    DeclarationStmt  go to state 74
+    SimpleStmt       go to state 75
+    Block            go to state 76
+    IfStmt           go to state 77
+    WhileStmt        go to state 78
+    ForStmt          go to state 79
+    SwitchStmt       go to state 80
+    CaseStmt         go to state 81
+    LetStatement     go to state 82
+    PrintStmt        go to state 83
+    ReturnStmt       go to state 84
+    ExpressionStmt   go to state 85
+
+
+State 274
+
+   64 Interindex: Literal DOTDOT $@15 Literal .
+
+    $default  reduce using rule 64 (Interindex)
+
+
+State 275
+
+  128 LetStatement: LET MUT ID COLON Type ASSIGN Literal SEMICOLON .
+
+    $default  reduce using rule 128 (LetStatement)
+
+
+State 276
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON Operand RBRACK . ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON
+
+    ASSIGN  shift, and go to state 279
+
+
+State 277
+
+  136 LetStatement: LET ID COLON Type ASSIGN LOOP Block SEMICOLON .
+
+    $default  reduce using rule 136 (LetStatement)
+
+
+State 278
+
+  114 WhileBlock: LBRACE $@21 StatementList RBRACE .
+
+    $default  reduce using rule 114 (WhileBlock)
+
+
+State 279
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON Operand RBRACK ASSIGN . LBRACK $@22 LiteralList RBRACK SEMICOLON
+
+    LBRACK  shift, and go to state 280
+
+
+State 280
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON Operand RBRACK ASSIGN LBRACK . $@22 LiteralList RBRACK SEMICOLON
+
+    $default  reduce using rule 133 ($@22)
+
+    $@22  go to state 281
+
+
+State 281
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 . LiteralList RBRACK SEMICOLON
+
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Literal      go to state 282
+    LiteralList  go to state 283
+
+
+State 282
+
+  137 LiteralList: Literal . COMMA LiteralList
+  138            | Literal .
+
+    COMMA  shift, and go to state 284
+
+    $default  reduce using rule 138 (LiteralList)
+
+
+State 283
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 LiteralList . RBRACK SEMICOLON
+
+    RBRACK  shift, and go to state 285
+
+
+State 284
+
+  137 LiteralList: Literal COMMA . LiteralList
+
+    INT_LIT     shift, and go to state 51
+    FLOAT_LIT   shift, and go to state 52
+    BOOL_LIT    shift, and go to state 53
+    STRING_LIT  shift, and go to state 54
+
+    Literal      go to state 282
+    LiteralList  go to state 286
+
+
+State 285
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK . SEMICOLON
+
+    SEMICOLON  shift, and go to state 287
+
+
+State 286
+
+  137 LiteralList: Literal COMMA LiteralList .
+
+    $default  reduce using rule 137 (LiteralList)
+
+
+State 287
+
+  134 LetStatement: LET ID COLON LBRACK Type SEMICOLON Operand RBRACK ASSIGN LBRACK $@22 LiteralList RBRACK SEMICOLON .
+
+    $default  reduce using rule 134 (LetStatement)
